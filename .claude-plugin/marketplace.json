@@ -1,5 +1,5 @@
 {
-  "name": "clean-view-local",
+  "name": "wootware-claude-mod-clean-view",
   "owner": { "name": "Oliver Rivett-Carnac" },
-  "plugins": [{ "name": "clean-view", "source": "./" }]
+  "plugins": [{ "name": "wootware-claude-mod-clean-view", "source": "./" }]
 }

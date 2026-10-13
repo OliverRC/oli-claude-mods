@@ -7,12 +7,12 @@ type $ = EngineInterface
 type Checklist = CleanViewChecklist
 type Task = CleanViewTask
 
-export const PLAN_TOOL = 'mcp__clean-view__plan_steps'
-export const PROGRESS_TOOL = 'mcp__clean-view__report_progress'
+export const PLAN_TOOL = 'mcp__wootware-claude-mod-clean-view__plan_steps'
+export const PROGRESS_TOOL = 'mcp__wootware-claude-mod-clean-view__report_progress'
 
-const enabled = atom({ plugin: 'clean-view', key: 'cleanViewEnabled' } as const, true)
-const checklist = atom({ plugin: 'clean-view', key: 'checklist' } as const, null)
-const tickAtom = atom({ plugin: 'clean-view', key: 'tick' } as const, 0)
+const enabled = atom({ plugin: 'wootware-claude-mod-clean-view', key: 'cleanViewEnabled' } as const, true)
+const checklist = atom({ plugin: 'wootware-claude-mod-clean-view', key: 'checklist' } as const, null)
+const tickAtom = atom({ plugin: 'wootware-claude-mod-clean-view', key: 'tick' } as const, 0)
 
 const ALWAYS_ALLOWED = new Set(['ToolSearch', 'TodoWrite', 'TaskCreate', 'TaskUpdate', 'AskUserQuestion'])
 const STORE_KEY = 'cleanViewEnabled'
@@ -365,7 +365,7 @@ export function registerCleanView(on: On) {
   on('prompt.compose', async ($, e, next) => {
     const composed = await next(e)
     if (!(await read($, enabled))) return composed
-    return { ...composed, sections: [...composed.sections, { id: 'clean-view:guide', text: GUIDE, scope: 'session' as const }] }
+    return { ...composed, sections: [...composed.sections, { id: 'CLAUDE-MOD-CLEAN-VIEWide', text: GUIDE, scope: 'session' as const }] }
   })
 
   on('turn.start', async ($, e, next) => {
