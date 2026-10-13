@@ -590,7 +590,8 @@ export function registerCleanView(on: On) {
         <Text wrap="truncate-end">
           <Text color={PALETTE.subtle}>{stepText}  </Text>
           {Array.from({ length: barWidth }, (_, i) =>
-            i < barFilled ? <Text color={rampAt(barRamp, i / (barWidth - 1))}>▰</Text> : <Text color={PALETTE.track}>▱</Text>,
+            // A space between cells so the slanted glyphs don't run together.
+            i < barFilled ? <Text color={rampAt(barRamp, i / (barWidth - 1))}>{i === 0 ? '▰' : ' ▰'}</Text> : <Text color={PALETTE.track}>{i === 0 ? '▱' : ' ▱'}</Text>,
           )}
           <Text color={accent}>  {overall}%</Text>
         </Text>

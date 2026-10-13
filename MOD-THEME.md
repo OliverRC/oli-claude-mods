@@ -50,7 +50,7 @@ Each state has one accent. It tints the border, the overall bar and the percent.
 ```
 ╭──────────────────────────────────────────────────────────────╮
 │ ✶ Build my landing page                1m 12s [● Clean View: ON] │
-│ Step 2 of 4  ▰▰▰▰▱▱▱▱▱▱  38%                                  │
+│ Step 2 of 4  ▰ ▰ ▰ ▰ ▱ ▱ ▱ ▱ ▱ ▱  38%                         │
 │ ✓ Read your brand notes      ██████████  Done                │
 │ ▶ Build the pricing section  ██████░░░░  60%                 │
 │ ○ Add the contact form       ░░░░░░░░░░  Next                │
@@ -62,8 +62,8 @@ Each state has one accent. It tints the border, the overall bar and the percent.
   padding on each side. Only one frame: no nested boxes and no dividers.
 - **Header row:** the status glyph and title on the left. The timer and the toggle button sit on
   the right on every screen.
-- **Step line:** "Step N of M" in subtle, a compact 10-cell bar, then the percent. It's a quiet
-  summary, never a full-width bar.
+- **Step line:** "Step N of M" in subtle, a compact 10-cell bar with a space between cells
+  (▰ ▱ run together otherwise), then the percent. It's a quiet summary, never a full-width bar.
 - **Rows:** glyph (2 cells), name column, 10-cell meter, then a short label. Size the name column
   from `bodyColumns` so rows never wrap. Truncate with "…".
 - **Collapsed:** a finished job shrinks to its header line, still inside its green frame.
@@ -79,7 +79,7 @@ Each state has one accent. It tints the border, the overall bar and the percent.
 | ‖ | current step, paused waiting on you (yellow) |
 | ○ | upcoming step (subtle) |
 | █ / ░ | step meter, filled / empty |
-| ▰ / ▱ | overall bar, filled / empty |
+| ▰ / ▱ | overall bar, filled / empty, spaced one cell apart |
 | ⚠ | stuck |
 | ■ | stopped |
 | ● / ○ | toggle on / off |
