@@ -263,17 +263,58 @@ function fit(text: string, width: number): string {
   return text.padEnd(width)
 }
 
-function meter(task: Task, tick: number, isAnimated: boolean): string {
-  if (task.status === 'done') return '█'.repeat(METER)
-  if (task.status === 'upcoming') return '░'.repeat(METER)
+// A soft pastel palette that reads well on dark terminals.
+const PALETTE = {
+  peach: '#FAB387',
+  pink: '#F38BA8',
+  mauve: '#CBA6F7',
+  blue: '#89B4FA',
+  green: '#A6E3A1',
+  yellow: '#F9E2AF',
+  red: '#EBA0AC',
+  text: '#CDD6F4',
+  subtle: '#7F849C',
+  track: '#45475A',
+}
+const TITLE_RAMP = [PALETTE.peach, PALETTE.pink, PALETTE.mauve, PALETTE.blue]
+const SWEEP_FADE = ['#3B3052', '#5B4A7A', '#8C7BD0', '#B4BEFE']
+const SPARKLE = ['✶', '✷', '✸', '✹', '✺', '✹', '✸', '✷']
+
+function hex(color: string): [number, number, number] {
+  const n = parseInt(color.slice(1), 16)
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255]
+}
+
+/** The colour at `t` (0..1) along a ramp of hex stops. */
+function rampAt(stops: string[], t: number): string {
+  const x = Math.min(1, Math.max(0, t)) * (stops.length - 1)
+  const i = Math.min(stops.length - 2, Math.floor(x))
+  const a = hex(stops[i] ?? '#000000')
+  const b = hex(stops[i + 1] ?? '#000000')
+  const f = x - i
+  return '#' + a.map((v, k) => Math.round(v + ((b[k] ?? 0) - v) * f).toString(16).padStart(2, '0')).join('')
+}
+
+type Cell = { char: string; color: string }
+
+function meter(task: Task, tick: number, isAnimated: boolean): Cell[] {
+  const ramp = (i: number) => rampAt([PALETTE.pink, PALETTE.mauve, PALETTE.blue], i / (METER - 1))
+  const track = (): Cell => ({ char: '░', color: PALETTE.track })
+  if (task.status === 'done') return Array.from({ length: METER }, () => ({ char: '█', color: PALETTE.green }))
+  if (task.status === 'upcoming') return Array.from({ length: METER }, track)
   if (task.hasReported) {
     const filled = Math.round(task.percent / 10)
-    return '█'.repeat(filled) + '░'.repeat(METER - filled)
+    return Array.from({ length: METER }, (_, i) => (i < filled ? { char: '█', color: ramp(i) } : track()))
   }
-  // No percent yet: a three-cell sweep bouncing across the meter.
-  const step = isAnimated ? tick % 14 : 0
-  const at = step < 8 ? step : 14 - step
-  return '░'.repeat(at) + '▓▓▓' + '░'.repeat(METER - 3 - at)
+  // No percent yet: a fading four-cell comet bouncing across the meter.
+  const step = isAnimated ? tick % 12 : 0
+  const head = step < 7 ? step + 3 : 15 - step
+  const dir = step < 7 ? 1 : -1
+  return Array.from({ length: METER }, (_, i) => {
+    const behind = (head - i) * dir
+    const shade = SWEEP_FADE[SWEEP_FADE.length - 1 - behind]
+    return behind >= 0 && shade !== undefined ? { char: '█', color: shade } : track()
+  })
 }
 
 function label(task: Task, firstUpcoming: boolean): string {
@@ -441,74 +482,124 @@ export function registerCleanView(on: On) {
     const isOn = await read($, enabled)
     const list = await read($, checklist)
     const tick = await read($, tickAtom)
-    const width = e.props.bodyColumns
 
     const button = (
       <Button key="clean-view-toggle" label={isOn ? '● Clean View: ON' : '○ Clean View: OFF'} onPress={() => void toggle($)} />
     )
-    const headerRow = (header: RenderChildren) => (
+    const plainRow = (left: RenderChildren) => (
       <Box flexDirection="row" justifyContent="space-between">
-        <Box flexShrink={1}>{header}</Box>
+        <Box flexShrink={1}>{left}</Box>
         {button}
       </Box>
     )
-    if (!isOn || list === null) return headerRow(<Text> </Text>)
+    if (!isOn || list === null) return plainRow(<Text> </Text>)
 
     const now = await $.clock.now()
     const took = duration((list.finishedAt ?? now) - list.startedAt)
+    const accent = {
+      'working': PALETTE.pink,
+      'needs-you': PALETTE.yellow,
+      'stuck': PALETTE.red,
+      'stopped': PALETTE.subtle,
+      'done': PALETTE.green,
+    }[list.phase]
+    const isAnimated = list.phase === 'working' || list.phase === 'needs-you'
+
+    const words = list.title.split(' ')
+    const title = words.map((word, i) => (
+      <Text bold color={rampAt(TITLE_RAMP, words.length === 1 ? 0 : i / (words.length - 1))}>
+        {i === 0 ? word : ` ${word}`}
+      </Text>
+    ))
     const header = (() => {
       switch (list.phase) {
         case 'needs-you':
           return (
             <Text wrap="truncate-end">
-              <Text inverse bold color="yellow"> Needs you </Text> {list.needsYouReason ?? ''}
+              <Text inverse bold color={PALETTE.yellow}> Needs you </Text>
+              <Text color={PALETTE.text}> {list.needsYouReason ?? ''}</Text>
             </Text>
           )
         case 'stuck':
-          return <Text wrap="truncate-end" color="yellow">⚠ Stuck: {list.stuckReason ?? ''}</Text>
+          return <Text wrap="truncate-end" bold color={PALETTE.red}>⚠ Stuck: {list.stuckReason ?? ''}</Text>
         case 'stopped':
-          return <Text wrap="truncate-end">■ Stopped · {list.title} · you pressed Esc</Text>
+          return (
+            <Text wrap="truncate-end" color={PALETTE.subtle}>
+              ■ Stopped · {title} · you pressed Esc
+            </Text>
+          )
         case 'done':
-          return <Text wrap="truncate-end" color="green">✓ All done · {list.title} · took {took}</Text>
+          return (
+            <Text wrap="truncate-end">
+              <Text bold color={PALETTE.green}>✓ All done · </Text>
+              {title}
+              <Text color={PALETTE.subtle}> · took {took}</Text>
+            </Text>
+          )
         default:
-          return <Text wrap="truncate-end"><Text bold>{list.title}</Text> · {took}</Text>
+          return (
+            <Text wrap="truncate-end">
+              <Text color={accent}>{SPARKLE[tick % SPARKLE.length]} </Text>
+              {title}
+            </Text>
+          )
       }
     })()
-    if (list.phase === 'done' && list.isCollapsed) return headerRow(header)
+    const headerRow = (
+      <Box flexDirection="row" justifyContent="space-between">
+        <Box flexShrink={1}>{header}</Box>
+        <Box flexDirection="row" gap={1} flexShrink={0}>
+          {list.phase === 'working' && <Text color={PALETTE.subtle}>{took}</Text>}
+          {button}
+        </Box>
+      </Box>
+    )
+    if (list.phase === 'done' && list.isCollapsed) return headerRow
 
-    const isAnimated = list.phase === 'working' || list.phase === 'needs-you'
-    // glyph 2 + name + space + meter 10 + two spaces + label 7
-    const nameWidth = Math.max(6, width - 2 - 1 - METER - 2 - 7)
+    const total = list.tasks.length
+    const doneCount = list.tasks.filter(t => t.status === 'done').length
+    const active = list.tasks.find(t => t.status === 'active')
+    const overall = total === 0 ? 0 : Math.round((doneCount * 100 + (active?.percent ?? 0)) / total)
+    const stepOf = Math.min(total, doneCount + (active ? 1 : 0))
+
+    // border 2 + padding 2, then glyph 2 + name + space + meter 10 + two spaces + label 7
+    const nameWidth = Math.max(6, e.props.bodyColumns - 4 - 2 - 1 - METER - 2 - 7)
     const firstUpcoming = list.tasks.findIndex(t => t.status === 'upcoming')
+    const cells = (task: Task) => meter(task, tick, isAnimated).map(cell => <Text color={cell.color}>{cell.char}</Text>)
 
     return (
-      <Box flexDirection="column">
-        {headerRow(header)}
+      <Box flexDirection="column" borderStyle="round" borderColor={accent} paddingX={1}>
+        {headerRow}
+        <Box flexDirection="row" justifyContent="space-between">
+          <Text color={PALETTE.subtle}>Step {Math.max(1, stepOf)} of {total}</Text>
+          <Text bold color={accent}>{overall}%</Text>
+        </Box>
         {list.tasks.map((task, i) => {
           const name = fit(task.name, nameWidth)
           if (task.status === 'done') {
             return (
               <Text wrap="truncate-end">
-                <Text color="green">✓ </Text>
-                <Text dimColor>{name} </Text>
-                <Text color="green">{meter(task, tick, isAnimated)}</Text>
-                <Text dimColor>  {label(task, false)}</Text>
+                <Text color={PALETTE.green}>✓ </Text>
+                <Text color={PALETTE.subtle}>{name} </Text>
+                {cells(task)}
+                <Text color={PALETTE.green}>  {label(task, false)}</Text>
               </Text>
             )
           }
           if (task.status === 'active') {
+            const isWaiting = list.phase === 'needs-you'
             return (
               <Text wrap="truncate-end">
-                <Text color="cyan">{list.phase === 'needs-you' ? '‖ ' : '▶ '}</Text>
-                <Text bold>{name} </Text>
-                <Text color="cyan">{meter(task, tick, isAnimated)}</Text>
-                <Text>  {label(task, false)}</Text>
+                <Text color={isWaiting ? PALETTE.yellow : PALETTE.pink}>{isWaiting ? '‖ ' : '▶ '}</Text>
+                <Text bold color={PALETTE.text}>{name} </Text>
+                {cells(task)}
+                <Text bold color={accent}>  {label(task, false)}</Text>
               </Text>
             )
           }
           return (
-            <Text wrap="truncate-end" dimColor>
-              ○ {name} {meter(task, tick, isAnimated)}  {label(task, i === firstUpcoming)}
+            <Text wrap="truncate-end" color={PALETTE.subtle}>
+              ○ {name} {cells(task)}  {label(task, i === firstUpcoming)}
             </Text>
           )
         })}
