@@ -569,8 +569,7 @@ export function registerCleanView(on: On) {
     const overall = total === 0 ? 0 : Math.round((doneCount * 100 + (active?.percent ?? 0)) / total)
     const stepOf = Math.min(total, doneCount + (active ? 1 : 0))
     const stepText = `Step ${Math.max(1, stepOf)} of ${total}`
-    // border 2 + padding 2, the step text and a space, then a space and "100%"
-    const barWidth = Math.max(4, e.props.bodyColumns - 4 - stepText.length - 1 - 5)
+    const barWidth = METER
     const barFilled = Math.round((overall / 100) * barWidth)
     const barRamp = {
       'working': [PALETTE.peach, PALETTE.pink],
@@ -588,15 +587,13 @@ export function registerCleanView(on: On) {
     return (
       <Box flexDirection="column" borderStyle="round" borderColor={accent} paddingX={1}>
         {headerRow}
-        <Box flexDirection="row" justifyContent="space-between">
-          <Text wrap="truncate-end">
-            <Text color={PALETTE.subtle}>{stepText} </Text>
-            {Array.from({ length: barWidth }, (_, i) =>
-              i < barFilled ? <Text color={rampAt(barRamp, barWidth === 1 ? 0 : i / (barWidth - 1))}>█</Text> : <Text color={PALETTE.track}>░</Text>,
-            )}
-          </Text>
-          <Text bold color={accent}>{overall}%</Text>
-        </Box>
+        <Text wrap="truncate-end">
+          <Text color={PALETTE.subtle}>{stepText}  </Text>
+          {Array.from({ length: barWidth }, (_, i) =>
+            i < barFilled ? <Text color={rampAt(barRamp, i / (barWidth - 1))}>▰</Text> : <Text color={PALETTE.track}>▱</Text>,
+          )}
+          <Text color={accent}>  {overall}%</Text>
+        </Text>
         {list.tasks.map((task, i) => {
           const name = fit(task.name, nameWidth)
           if (task.status === 'done') {
