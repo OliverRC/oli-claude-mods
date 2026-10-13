@@ -1,0 +1,5 @@
+{
+  "name": "clean-view-local",
+  "owner": { "name": "Oliver Rivett-Carnac" },
+  "plugins": [{ "name": "clean-view", "source": "./" }]
+}
