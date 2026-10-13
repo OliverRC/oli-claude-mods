@@ -11,13 +11,15 @@ const BAND = {
 
 /** What sits beneath the plugin in a session: the tools, the store, the clock, Haiku. */
 function world(on: On) {
-  mock.clock(on, { now: 1_000_000 })
+  const clock = mock.clock(on, { now: 1_000_000 })
   mock.store(on)
   on('tool.call', () => ({ result: 'ok' }))
   on('turn.start', (_$, e) => ({ turnId: e.turnId }))
   on('model.complete', () => ({ value: { isAnswered: true, text: 'Build my landing page', usage: {} } }) as never)
   on('classic.Notification', () => ({}) as never)
   on('command.register', () => ({}) as never)
+  on('turn.complete', (_$, e) => ({ text: e.answer }))
+  return clock
 }
 
 test('names come out plain and short', () => {
@@ -104,4 +106,23 @@ test('tools are denied before a plan exists and allowed after', async ($, on) =>
   const after = await $.tool.call({ tool: 'Read', file_path: '/tmp/x' } as never)
   expect(after.deny).toBeUndefined()
   expect(after.isError).toBeUndefined()
+})
+
+test('a finished job collapses to one line and keeps its border', async ($, on) => {
+  const clock = world(on)
+  await $.turn.start({ text: 'Build my landing page', turnId: 't1' })
+  await $.tool.call({ tool: PLAN_TOOL, steps: ['Read your notes', 'Build the page'] } as never)
+  await $.tool.call({ tool: PROGRESS_TOOL, task: 'Build the page', percent: 100 } as never)
+  await $.turn.complete({ answer: 'Done.', durationMs: 1000, isAborted: false, turnId: 't1', reason: 'answer' })
+
+  const full = await $.ui.mount({ ...BAND, surface: 'terminal' })
+  expect(await full.find({ text: /✓ All done/ })).toBeDefined()
+  expect(await full.find({ text: /Read your notes/ })).toBeDefined()
+  await full.unmount()
+
+  await clock.advance(5000)
+  const ui = await $.ui.mount({ ...BAND, surface: 'terminal' })
+  expect(await ui.find({ text: /✓ All done/ })).toBeDefined()
+  expect(await ui.find({ text: /Read your notes/ })).toBeUndefined()
+  expect(await ui.drawn()).toMatchObject({ type: 'Box', props: { borderStyle: 'round' } })
 })

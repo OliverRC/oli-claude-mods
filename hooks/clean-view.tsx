@@ -300,7 +300,7 @@ type Cell = { char: string; color: string }
 function meter(task: Task, tick: number, isAnimated: boolean): Cell[] {
   const ramp = (i: number) => rampAt([PALETTE.pink, PALETTE.mauve, PALETTE.blue], i / (METER - 1))
   const track = (): Cell => ({ char: '░', color: PALETTE.track })
-  if (task.status === 'done') return Array.from({ length: METER }, () => ({ char: '█', color: PALETTE.green }))
+  if (task.status === 'done') return Array.from({ length: METER }, (_, i) => ({ char: '█', color: rampAt(['#40A02B', PALETTE.green], i / (METER - 1)) }))
   if (task.status === 'upcoming') return Array.from({ length: METER }, track)
   if (task.hasReported) {
     const filled = Math.round(task.percent / 10)
@@ -554,13 +554,31 @@ export function registerCleanView(on: On) {
         </Box>
       </Box>
     )
-    if (list.phase === 'done' && list.isCollapsed) return headerRow
+    // Collapsed, the finished job keeps its frame: one line inside the green border.
+    if (list.phase === 'done' && list.isCollapsed) {
+      return (
+        <Box flexDirection="column" borderStyle="round" borderColor={accent} paddingX={1}>
+          {headerRow}
+        </Box>
+      )
+    }
 
     const total = list.tasks.length
     const doneCount = list.tasks.filter(t => t.status === 'done').length
     const active = list.tasks.find(t => t.status === 'active')
     const overall = total === 0 ? 0 : Math.round((doneCount * 100 + (active?.percent ?? 0)) / total)
     const stepOf = Math.min(total, doneCount + (active ? 1 : 0))
+    const stepText = `Step ${Math.max(1, stepOf)} of ${total}`
+    // border 2 + padding 2, the step text and a space, then a space and "100%"
+    const barWidth = Math.max(4, e.props.bodyColumns - 4 - stepText.length - 1 - 5)
+    const barFilled = Math.round((overall / 100) * barWidth)
+    const barRamp = {
+      'working': [PALETTE.peach, PALETTE.pink],
+      'needs-you': [PALETTE.peach, PALETTE.yellow],
+      'stuck': [PALETTE.peach, PALETTE.red],
+      'stopped': [PALETTE.track, PALETTE.subtle],
+      'done': ['#40A02B', PALETTE.green],
+    }[list.phase]
 
     // border 2 + padding 2, then glyph 2 + name + space + meter 10 + two spaces + label 7
     const nameWidth = Math.max(6, e.props.bodyColumns - 4 - 2 - 1 - METER - 2 - 7)
@@ -571,7 +589,12 @@ export function registerCleanView(on: On) {
       <Box flexDirection="column" borderStyle="round" borderColor={accent} paddingX={1}>
         {headerRow}
         <Box flexDirection="row" justifyContent="space-between">
-          <Text color={PALETTE.subtle}>Step {Math.max(1, stepOf)} of {total}</Text>
+          <Text wrap="truncate-end">
+            <Text color={PALETTE.subtle}>{stepText} </Text>
+            {Array.from({ length: barWidth }, (_, i) =>
+              i < barFilled ? <Text color={rampAt(barRamp, barWidth === 1 ? 0 : i / (barWidth - 1))}>█</Text> : <Text color={PALETTE.track}>░</Text>,
+            )}
+          </Text>
           <Text bold color={accent}>{overall}%</Text>
         </Box>
         {list.tasks.map((task, i) => {
