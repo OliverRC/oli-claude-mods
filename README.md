@@ -1,40 +1,34 @@
-# Clean View
+# Oli's Claude Code mods
 
-A Claude Code mod that makes Claude feel calm for non-technical people: tool calls, diffs and
-command output are hidden, and a simple checklist above the prompt shows the plan, the current
-step and how far along it is.
+A marketplace of Claude Code mods, one per folder under `plugins/`.
+
+| Mod | What it does |
+| --- | --- |
+| [Clean View](plugins/clean-view) | A calm checklist above the prompt that hides tool calls, diffs and command output while Claude works. |
 
 ## Naming
 
-Oliver's Claude Code mods are named `oli-claude-mod-<what-it-does>`: the folder, the
-repository, the plugin and its marketplace all share that one name. Plugin names may not start
-with `claude-` (Claude Code reserves those for Anthropic), so the `oli-` prefix comes first.
-
-## Use it
-
-- Click **● Clean View: ON** at the right of the band above the prompt to switch it, or type
-  `/simple on`, `/simple off`, or `/simple` to flip it. The choice is remembered.
+Each mod is named `oli-claude-mod-<what-it-does>` and lives in `plugins/<what-it-does>/`. Plugin
+names may not start with `claude-` (Claude Code reserves those for Anthropic), so the `oli-` prefix
+comes first. The marketplace itself is `oli-claude-mods`.
 
 ## Install
 
-On this machine (read straight from this folder, so edits apply after `/reload-plugins`):
+At the Claude Code prompt:
 
 ```
-claude plugin marketplace add ~/Dev/GitHub/oliverrc/oli-claude-mod-clean-view
-claude plugin install oli-claude-mod-clean-view@oli-claude-mod-clean-view --scope user
+/plugin marketplace add OliverRC/oli-claude-mods
+/plugin install oli-claude-mod-clean-view@oli-claude-mods
 ```
 
-From GitHub, once this folder is pushed to a repository, at the Claude Code prompt:
+On this machine, read straight from this folder so edits apply after `/reload-plugins`:
 
 ```
-/plugin install oli-claude-mod-clean-view --marketplace <owner>/<repo>
+claude plugin marketplace add ~/Dev/GitHub/oliverrc/oli-claude-mods
+claude plugin install oli-claude-mod-clean-view@oli-claude-mods --scope user
 ```
 
-Then press `y` to add the marketplace and pick the user scope.
+## Add a mod
 
-## Develop
-
-```
-claude plugin validate .
-claude plugin test .
-```
+Create `plugins/<name>/` with its own `.claude-plugin/plugin.json` (named `oli-claude-mod-<name>`),
+then add it to the `plugins` list in `.claude-plugin/marketplace.json`.

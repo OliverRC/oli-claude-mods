@@ -1,5 +1,6 @@
 {
-  "name": "oli-claude-mod-clean-view",
+  "name": "oli-claude-mods",
+  "description": "Oli's Claude Code mods.",
   "owner": { "name": "Oliver Rivett-Carnac" },
-  "plugins": [{ "name": "oli-claude-mod-clean-view", "source": "./" }]
+  "plugins": [{ "name": "oli-claude-mod-clean-view", "source": "./plugins/clean-view" }]
 }
