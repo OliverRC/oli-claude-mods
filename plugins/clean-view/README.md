@@ -4,6 +4,8 @@ A Claude Code mod that makes Claude feel calm for non-technical people: tool cal
 command output are hidden, and a simple checklist above the prompt shows the plan, the current
 step and how far along it is.
 
+The idea and original prompt for Clean View came from [Tristen O'Brien](https://tristenobrien.ai/).
+
 ## Use it
 
 - Click **● Clean View: ON** at the right of the band above the prompt to switch it, or type

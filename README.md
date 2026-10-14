@@ -4,7 +4,7 @@ A marketplace of Claude Code mods, one per folder under `plugins/`.
 
 | Mod | What it does |
 | --- | --- |
-| [Clean View](plugins/clean-view) | A calm checklist above the prompt that hides tool calls, diffs and command output while Claude works. |
+| [Clean View](plugins/clean-view) | A calm checklist above the prompt that hides tool calls, diffs and command output while Claude works. Idea by [Tristen O'Brien](https://tristenobrien.ai/). |
 
 ## Naming
 
