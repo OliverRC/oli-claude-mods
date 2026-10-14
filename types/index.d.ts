@@ -25,7 +25,7 @@ export type CleanViewChecklist = {
 
 declare module 'claude-code' {
   interface PluginState {
-    'wootware-claude-mod-clean-view': {
+    'oli-claude-mod-clean-view': {
       cleanViewEnabled: boolean
       checklist: CleanViewChecklist | null
       tick: number

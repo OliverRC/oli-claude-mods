@@ -7,12 +7,12 @@ type $ = EngineInterface
 type Checklist = CleanViewChecklist
 type Task = CleanViewTask
 
-export const PLAN_TOOL = 'mcp__wootware-claude-mod-clean-view__plan_steps'
-export const PROGRESS_TOOL = 'mcp__wootware-claude-mod-clean-view__report_progress'
+export const PLAN_TOOL = 'mcp__oli-claude-mod-clean-view__plan_steps'
+export const PROGRESS_TOOL = 'mcp__oli-claude-mod-clean-view__report_progress'
 
-const enabled = atom({ plugin: 'wootware-claude-mod-clean-view', key: 'cleanViewEnabled' } as const, true)
-const checklist = atom({ plugin: 'wootware-claude-mod-clean-view', key: 'checklist' } as const, null)
-const tickAtom = atom({ plugin: 'wootware-claude-mod-clean-view', key: 'tick' } as const, 0)
+const enabled = atom({ plugin: 'oli-claude-mod-clean-view', key: 'cleanViewEnabled' } as const, true)
+const checklist = atom({ plugin: 'oli-claude-mod-clean-view', key: 'checklist' } as const, null)
+const tickAtom = atom({ plugin: 'oli-claude-mod-clean-view', key: 'tick' } as const, 0)
 
 const ALWAYS_ALLOWED = new Set(['ToolSearch', 'TodoWrite', 'TaskCreate', 'TaskUpdate', 'AskUserQuestion'])
 const STORE_KEY = 'cleanViewEnabled'

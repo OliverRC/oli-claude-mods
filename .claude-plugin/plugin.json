@@ -1,5 +1,5 @@
 {
-  "name": "wootware-claude-mod-clean-view",
+  "name": "oli-claude-mod-clean-view",
   "version": "0.1.0",
   "description": "A calm checklist above the prompt that hides tool calls, diffs and command output while Claude works.",
   "types": "./types/index.d.ts"

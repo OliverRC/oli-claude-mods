@@ -4,7 +4,7 @@ import type { On } from 'claude-code'
 import { cleanName, PLAN_TOOL, PROGRESS_TOOL } from '../hooks/clean-view'
 
 const BAND = {
-  plugin: 'wootware-claude-mod-clean-view',
+  plugin: 'oli-claude-mod-clean-view',
   component: 'AbovePrompt',
   props: { hasSurvey: false, isWorking: true, maxRows: 20, bodyColumns: 80 } as never,
 } as const

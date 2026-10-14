@@ -6,9 +6,9 @@ step and how far along it is.
 
 ## Naming
 
-Wootware's Claude Code mods are named `wootware-claude-mod-<what-it-does>`: the folder, the
+Oliver's Claude Code mods are named `oli-claude-mod-<what-it-does>`: the folder, the
 repository, the plugin and its marketplace all share that one name. Plugin names may not start
-with `claude-` (Claude Code reserves those for Anthropic), so the `wootware-` prefix comes first.
+with `claude-` (Claude Code reserves those for Anthropic), so the `oli-` prefix comes first.
 
 ## Use it
 
@@ -20,14 +20,14 @@ with `claude-` (Claude Code reserves those for Anthropic), so the `wootware-` pr
 On this machine (read straight from this folder, so edits apply after `/reload-plugins`):
 
 ```
-claude plugin marketplace add ~/Dev/GitHub/wootware-claude-mod-clean-view
-claude plugin install wootware-claude-mod-clean-view@wootware-claude-mod-clean-view --scope user
+claude plugin marketplace add ~/Dev/GitHub/oliverrc/oli-claude-mod-clean-view
+claude plugin install oli-claude-mod-clean-view@oli-claude-mod-clean-view --scope user
 ```
 
 From GitHub, once this folder is pushed to a repository, at the Claude Code prompt:
 
 ```
-/plugin install wootware-claude-mod-clean-view --marketplace <owner>/<repo>
+/plugin install oli-claude-mod-clean-view --marketplace <owner>/<repo>
 ```
 
 Then press `y` to add the marketplace and pick the user scope.
